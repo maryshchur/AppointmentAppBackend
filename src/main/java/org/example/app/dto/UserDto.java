@@ -33,6 +33,7 @@ public class UserDto {
     //@NotNull(message = ValidationErrorConstants.EMPTY_PASSWORD)
     @Size(min = 6, max = 30)
     @NotBlank
+
     private String password;
 
     @NotNull

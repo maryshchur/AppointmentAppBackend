@@ -23,9 +23,6 @@ public class TokenManagementService {
     @Value("${jwt.token.expire}")
     private String expireTimeAccessToken;
 
-//    @Value("${expireTimeRefreshToken}")
-//    private String expireTimeRefreshToken;
-
     private UserPrincipalDetailsService userPrincipalDetailsService;
 
     @Autowired
@@ -43,11 +40,11 @@ public class TokenManagementService {
         long expirationTime = Long.parseLong(expireTimeAccessToken);
         Date expiryDate = new Date(nowMillis + expirationTime);
 
-        return Jwts.builder()//
-                .setSubject(email)//
-                .setIssuedAt(new Date())//
-                .setExpiration(expiryDate)//
-                .signWith(SignatureAlgorithm.HS256, secretKey)//
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
