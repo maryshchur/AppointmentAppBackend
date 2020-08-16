@@ -107,21 +107,23 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
 
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void cancelBookedLesson(Long lessonId, Long studentId) {
-        sendEmailForCancelingBookedLesson( getLessonsByStudentIdAndTeacherId(lessonId,studentId));
+        sendEmailForCancelingBookedLesson(getLessonsByStudentIdAndTeacherId(lessonId, studentId));
     }
 
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public Double getFullPrizeForBookedLesson(Long lessonId, Long studentId){
-        BookedLesson bookedLesson = getLessonsByStudentIdAndTeacherId(lessonId,studentId);
-        Long lessonDuration = getDateDiff(bookedLesson.getTimeFrom(),bookedLesson.getTimeTo(),TimeUnit.MINUTES);
-        return (lessonDuration.doubleValue()*bookedLesson.getTeacher().getPrize().getPrize())
-                /bookedLesson.getTeacher().getPrize().getAmountOfTime();
+    public int getFullPrizeForBookedLesson(Long lessonId, Long studentId) {
+        BookedLesson bookedLesson = getLessonsByStudentIdAndTeacherId(lessonId, studentId);
+        Long lessonDuration = getDateDiff(bookedLesson.getTimeFrom(), bookedLesson.getTimeTo(), TimeUnit.MINUTES);
+        return (int) Math.round((lessonDuration.doubleValue() * bookedLesson.getTeacher().getPrize().getPrize())
+                / bookedLesson.getTeacher().getPrize().getAmountOfTime());
     }
+
     private long getDateDiff(Time date1, Time date2, TimeUnit timeUnit) {
         long diffInMillies = date2.getTime() - date1.getTime();
-        return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+        return timeUnit.convert(diffInMillies, TimeUnit.MILLISECONDS);
     }
-    private BookedLesson getLessonsByStudentIdAndTeacherId(Long lessonId, Long studentId){
+
+    private BookedLesson getLessonsByStudentIdAndTeacherId(Long lessonId, Long studentId) {
         BookedLesson bookedLesson = findById(lessonId);
         if (bookedLesson.getStudent().getId() != studentId) {
             throw new NotFoundException(String.format(
@@ -145,45 +147,44 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
         BookedLesson bookedLesson = findById(lessonId);
         bookedLessonRepository.deleteById(lessonId);
         if (bookedLesson.isAproved()) {
-            List<FreeTime> existFreeTime = freeTimeRepository.findByUserIdAndDateAndTimeFromEqualsOrTimeToEquals(
-                    bookedLesson.getTeacher().getId(), bookedLesson.getDate(), bookedLesson.getTimeTo(), bookedLesson.getTimeFrom());
-            if (!existFreeTime.isEmpty()) {
-                if (existFreeTime.size() == 2) {
-                    FreeTime f1 = existFreeTime.stream().sorted(Comparator.comparing(FreeTime::getTimeFrom)).findFirst().get();
-                    FreeTime f2 = existFreeTime.stream().sorted(Comparator.comparing(FreeTime::getTimeFrom)).skip(1).findFirst().get();
-                    freeTimeService.save(new FreeTimeDto(bookedLesson.getDate(),
-                                    f1.getTimeFrom(), f2.getTimeTo()),
-                            bookedLesson.getTeacher().getEmail());
-                    freeTimeService.delete(f1.getId());
-                    freeTimeService.delete(f2.getId());
-
-                } else {
-                    FreeTime existTime = existFreeTime.get(0);
-                    if (existTime.getTimeFrom().equals(bookedLesson.getTimeTo())) {
-                        freeTimeService.save(new FreeTimeDto(bookedLesson.getDate(),
-                                bookedLesson.getTimeFrom(), existTime.getTimeTo()), bookedLesson.getTeacher().getEmail());
-                    } else {
-                        freeTimeService.save(new FreeTimeDto(bookedLesson.getDate(),
-                                existTime.getTimeFrom(), bookedLesson.getTimeTo()), bookedLesson.getTeacher().getEmail());
-
-                    }
-                    freeTimeService.delete(existTime.getId());
-                }
-            } else {
-                freeTimeService.save(new FreeTimeDto(bookedLesson.getDate(), bookedLesson.getTimeFrom(),
-                        bookedLesson.getTimeTo()), bookedLesson.getTeacher().getEmail());
-            }
+            saveCancelLessonTimeToTeacherFreeTime(bookedLesson);
         }
     }
 
-    // private FreeTimeDto joinFreeTimeIfNeeded(BookedLesson canceledLesson) {
-//        List<FreeTimeDto> allFreeHoursInThatDay = freeTimeService.
-//                getTeacherFreeTimeByData(canceledLesson.getTeacher().getId(), canceledLesson.getDate());
-//        return allFreeHoursInThatDay.stream().sorted(Comparator.comparing(FreeTimeDto::getTimeFrom)).filter(
-//                x -> x.getTimeFrom().equals(canceledLesson.getTimeTo()) ||
-//                        x.getTimeTo().equals(canceledLesson.getTimeFrom())).findFirst().get();
+    private void saveCancelLessonTimeToTeacherFreeTime(BookedLesson bookedLesson) {
+        List<FreeTime> existFreeTimeWithSameBoundary = freeTimeRepository.findByUserIdAndDateAndTimeFromEqualsOrTimeToEquals(
+                bookedLesson.getTeacher().getId(), bookedLesson.getDate(), bookedLesson.getTimeTo(), bookedLesson.getTimeFrom());
+        if (!existFreeTimeWithSameBoundary.isEmpty()) {
+            mergeTimeRangesIntoOne(bookedLesson, existFreeTimeWithSameBoundary);
+        } else {
+            freeTimeService.save(new FreeTimeDto(bookedLesson.getDate(), bookedLesson.getTimeFrom(),
+                    bookedLesson.getTimeTo()), bookedLesson.getTeacher().getEmail());
+        }
+    }
 
-    //}
+    private void mergeTimeRangesIntoOne(BookedLesson bookedLesson, List<FreeTime> existFreeTimeWithSameBoundary) {
+        if (existFreeTimeWithSameBoundary.size() == 2) {
+            existFreeTimeWithSameBoundary = existFreeTimeWithSameBoundary.stream().sorted(Comparator.comparing(FreeTime::getTimeFrom)).collect(Collectors.toList());
+            FreeTime f1 = existFreeTimeWithSameBoundary.get(0);
+            FreeTime f2 = existFreeTimeWithSameBoundary.get(1);
+            freeTimeService.save(new FreeTimeDto(bookedLesson.getDate(),
+                            f1.getTimeFrom(), f2.getTimeTo()),
+                    bookedLesson.getTeacher().getEmail());
+            freeTimeService.delete(f1.getId());
+            freeTimeService.delete(f2.getId());
+
+        } else {
+            FreeTime existTime = existFreeTimeWithSameBoundary.get(0);
+            if (existTime.getTimeFrom().equals(bookedLesson.getTimeTo())) {
+                freeTimeService.save(new FreeTimeDto(bookedLesson.getDate(),
+                        bookedLesson.getTimeFrom(), existTime.getTimeTo()), bookedLesson.getTeacher().getEmail());
+            } else {
+                freeTimeService.save(new FreeTimeDto(bookedLesson.getDate(),
+                        existTime.getTimeFrom(), bookedLesson.getTimeTo()), bookedLesson.getTeacher().getEmail());
+            }
+            freeTimeService.delete(existTime.getId());
+        }
+    }
 
     private BookedLesson findById(Long id) {
         return bookedLessonRepository.findById(id).
