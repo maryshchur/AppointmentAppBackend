@@ -40,7 +40,7 @@ public class StudentController {
     }
 
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
-    @PostMapping("/student/bookLessons")
+    @PostMapping("/student/book-lesson")
     public ResponseEntity bookLesson(@Valid @RequestBody BookedLessonDto bookedLessonDto,
                                      @ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
         crossTimeRangeValidationService.checkIfTimeRangeSlotIsUnique(bookedLessonDto,principal.getUser().getId());
@@ -49,40 +49,40 @@ public class StudentController {
     }
 
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
-    @GetMapping("/student/allBookedLessons")
+    @GetMapping("/student/all-booked-lessons")
     public ResponseEntity<List<BookedLessonDto>> getBookedLessons(
             @ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.status(HttpStatus.OK).body(bookedLessonsService.getByStudentId(principal.getUser().getId()));
     }
 
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
-    @DeleteMapping("/student/cancelLesson/{id}")
+    @GetMapping("/student/cancel-lesson/{id}")
     public ResponseEntity<List<UserDto>> cancelLessonsBooking(@PathVariable Long id,
                                                               @ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
         bookedLessonsService.cancelBookedLesson(id, principal.getUser().getId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/approveCancelLesson/{id}")
+    @GetMapping ("/approve-cancel-lesson/{id}")
     public ResponseEntity<List<UserDto>> approveCancelLessonOperation(@PathVariable Long id) {
         bookedLessonsService.approveCancelLessonOperation(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
-    @GetMapping("/student/{teacherId}/freeTime")
+    @GetMapping("/student/{teacherId}/free-time")
     public ResponseEntity<List<FreeTimeDto>> getTeacherFreeTime(@PathVariable Long teacherId) {
         return ResponseEntity.status(HttpStatus.OK).body(freeTimeService.getTeacherFreeTimes(teacherId));
     }
 
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
-    @GetMapping("/student/allTeachers")
+    @GetMapping("/student/all-teachers")
     public ResponseEntity<List<UserDto>> getAllTeachers() {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getAllTeachers());
     }
 
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
-    @GetMapping("/student/{lessonId}/fullPrize")
+    @GetMapping("/student/{lessonId}/full-prize")
     public ResponseEntity<Integer> getLessonFullPrize(@PathVariable Long lessonId,
                                                       @ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.status(HttpStatus.OK).

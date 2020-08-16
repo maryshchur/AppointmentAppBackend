@@ -28,10 +28,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private static final String[] AUTH_WHITELIST = {
             "/registration",
             "/authentication",
-            "/refresh",
-            "/approveCancelLesson/",
-            "/approveBooking/",
-            "/declineBooking/"
+            "/approve-cancel-lesson/",
+            "/approve-booking/",
+            "/decline-booking/",
+            "/registration-confirm"
 
     };
 

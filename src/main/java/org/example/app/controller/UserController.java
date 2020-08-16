@@ -56,7 +56,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/registrationConfirm")
+    @GetMapping("/registration-confirm")
     public ResponseEntity confirmRegistration(@RequestParam("token") String token) {
         userService.confirmRegistration(token);
         return ResponseEntity.status(HttpStatus.OK).build();
