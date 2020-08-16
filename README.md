@@ -1,5 +1,5 @@
 # AppointmentApp
-AppointmentApp is API for univercity or other educational structure to facilitate connection between students and teachers. This why system supports two roles: teacher and student. Every role is responsible for a different part of functionality. 
+AppointmentApp is an API for university or other educational structure to facilitate connection between students and teachers. This why system supports two roles: teacher and student. Every role is responsible for a different part of functionality. 
 Teacher can set time range for personal lessons, set prize for certain amount of time and also approve or decline lessons request by email.
 Student can book private lesson and cancel it by email. 
 
