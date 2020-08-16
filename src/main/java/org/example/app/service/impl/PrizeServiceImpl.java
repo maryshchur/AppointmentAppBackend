@@ -1,6 +1,7 @@
 package org.example.app.service.impl;
 
 import org.example.app.dto.PrizeDto;
+import org.example.app.dto.RegisterUserDto;
 import org.example.app.dto.UserDto;
 import org.example.app.entities.Prize;
 import org.example.app.entities.User;
@@ -10,7 +11,6 @@ import org.example.app.service.PrizeService;
 import org.example.app.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -40,7 +40,6 @@ public class PrizeServiceImpl implements PrizeService {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_TEACHER')")
     @Override
     public PrizeDto getPrizeById(Long id) {
         return modelMapper.map(prizeRepository.findById(id).orElseThrow(() -> new NotFoundException("Prize was not found")), PrizeDto.class);

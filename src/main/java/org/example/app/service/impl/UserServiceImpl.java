@@ -1,5 +1,6 @@
 package org.example.app.service.impl;
 
+import org.example.app.dto.RegisterUserDto;
 import org.example.app.dto.UserDto;
 import org.example.app.entities.User;
 import org.example.app.entities.VerificationToken;
@@ -19,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -38,8 +41,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void register(UserDto userDto) {
-        User user = modelMapper.map(userDto, User.class);
+    public void register(RegisterUserDto registerUserDto) {
+        User user = modelMapper.map(registerUserDto, User.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setEnabled(false);
         saveOrUpdate(user);
@@ -55,12 +58,12 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     @Override
     public List<UserDto> getAllTeachers() {
-        List<UserDto> userDtos= userRepository.findAllByRoleId(1L).stream().map(teacher -> modelMapper.map(teacher, UserDto.class)).
+        List<UserDto> UserDtos = userRepository.findAllByRoleId(1L).stream().map(teacher -> modelMapper.map(teacher, UserDto.class)).
                 collect(Collectors.toList());
-        if(userDtos.isEmpty()){
+        if(UserDtos.isEmpty()){
             throw new NotFoundException("There is no teachers");
         }
-        return userDtos;
+        return UserDtos;
     }
 
     public UserDto getUserByEmail(String email) {
@@ -69,7 +72,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createVerificationToken(UserDto user, String token) {
+    public void createVerificationToken(RegisterUserDto user, String token) {
         verificationTokenRepository.save(new VerificationToken(token,
                 modelMapper.map(getUserByEmail(user.getEmail()), User.class)));
     }

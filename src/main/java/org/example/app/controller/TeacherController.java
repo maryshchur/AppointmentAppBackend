@@ -10,6 +10,7 @@ import org.example.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -72,12 +73,14 @@ public class TeacherController {
         return ResponseEntity.status(HttpStatus.OK).body(bookedLessonsService.getByTeacherId(principal.getUser().getId()));
     }
 
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
     @GetMapping("/teacher/free-hours")
     public ResponseEntity<List<FreeTimeDto>> getAllFreeHours(@ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.status(HttpStatus.OK).body(freeTimeService.getTeacherFreeTimes(principal.getUser().getId()));
     }
 
+    @PreAuthorize("hasRole('ROLE_TEACHER')")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
     @GetMapping("/teacher/prize")
     public ResponseEntity<PrizeDto> getPrize(@ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {

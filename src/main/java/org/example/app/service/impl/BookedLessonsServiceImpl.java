@@ -4,6 +4,7 @@ import org.example.app.controller.StudentController;
 import org.example.app.controller.TeacherController;
 import org.example.app.dto.BookedLessonDto;
 import org.example.app.dto.FreeTimeDto;
+import org.example.app.dto.RegisterUserDto;
 import org.example.app.dto.UserDto;
 import org.example.app.entities.BookedLesson;
 import org.example.app.entities.FreeTime;

@@ -1,12 +1,8 @@
 package org.example.app.controller;
 
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
-import org.example.app.dto.FreeTimeDto;
 import org.example.app.dto.LoginedUser;
-import org.example.app.dto.PrizeDto;
-import org.example.app.dto.UserDto;
+import org.example.app.dto.RegisterUserDto;
 import org.example.app.event.OnRegistrationSuccessEvent;
 import org.example.app.security.AuthenticationService;
 import org.example.app.security.TokenManagementService;
@@ -18,12 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import java.util.List;
+
 
 @RestController
 @Validated
@@ -50,9 +47,9 @@ public class UserController {
     }
 
     @PostMapping("/registration")
-    public ResponseEntity createUser(@Valid @RequestBody UserDto userDto) {
-        userService.register(userDto);
-        eventPublisher.publishEvent(new OnRegistrationSuccessEvent(userDto));
+    public ResponseEntity createUser(@Valid @RequestBody RegisterUserDto registerUserDto) {
+        userService.register(registerUserDto);
+        eventPublisher.publishEvent(new OnRegistrationSuccessEvent(registerUserDto));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

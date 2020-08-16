@@ -1,24 +1,23 @@
 package org.example.app.event;
 
-import org.example.app.dto.UserDto;
-import org.example.app.entities.User;
+import org.example.app.dto.RegisterUserDto;
 import org.springframework.context.ApplicationEvent;
 
 public class OnRegistrationSuccessEvent extends ApplicationEvent {
     private static final long serialVersionUID = 1L;
-    private UserDto user;
+    private RegisterUserDto user;
 
-    public OnRegistrationSuccessEvent(UserDto user) {
+    public OnRegistrationSuccessEvent(RegisterUserDto user) {
         super(user);
         this.user = user;
     }
 
 
-    public UserDto getUser() {
+    public RegisterUserDto getUser() {
         return user;
     }
 
-    public void setUser(UserDto user) {
+    public void setUser(RegisterUserDto user) {
         this.user = user;
     }
 }

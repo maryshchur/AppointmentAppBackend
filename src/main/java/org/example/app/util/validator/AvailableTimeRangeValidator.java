@@ -1,8 +1,8 @@
 package org.example.app.util.validator;
 
+import org.example.app.dto.RegisterUserDto;
 import org.example.app.dto.UserDto;
 import org.example.app.entities.User;
-import org.example.app.repository.BookedLessonRepository;
 import org.example.app.repository.FreeTimeRepository;
 import org.example.app.service.UserService;
 import org.springframework.beans.BeanWrapperImpl;
@@ -37,7 +37,6 @@ public class AvailableTimeRangeValidator implements ConstraintValidator<IsAvaila
 
     @Override
     public boolean isValid(Object o, ConstraintValidatorContext constraintValidatorContext) {
-        try {
             final Object firstObj = new BeanWrapperImpl(o).getPropertyValue( timeFrom);
             final Object secondObj = new BeanWrapperImpl(o).getPropertyValue(timeTo);
             final Object thirdObj = new BeanWrapperImpl(o).getPropertyValue(date);
@@ -49,9 +48,5 @@ public class AvailableTimeRangeValidator implements ConstraintValidator<IsAvaila
                             (user.getId(), LocalDate.parse(thirdObj.toString()),
                                     Time.valueOf(firstObj.toString()),
                                     Time.valueOf(secondObj.toString())).isEmpty());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 }

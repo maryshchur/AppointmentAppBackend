@@ -1,8 +1,7 @@
 package org.example.app.event;
 
-import org.example.app.controller.StudentController;
 import org.example.app.controller.UserController;
-import org.example.app.dto.UserDto;
+import org.example.app.dto.RegisterUserDto;
 import org.example.app.service.UserService;
 import org.example.app.util.EmailSender;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,7 @@ public class RegistrationEmailListener implements ApplicationListener<OnRegistra
     }
 
     private void confirmRegistration(OnRegistrationSuccessEvent event){
-        UserDto user = event.getUser();
+        RegisterUserDto user = event.getUser();
         String token = UUID.randomUUID().toString();
         userService.createVerificationToken(user,token);
         emailSender.sendEmail("Registration Confirmation",

@@ -4,12 +4,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.Authorization;
 import org.example.app.dto.BookedLessonDto;
 import org.example.app.dto.FreeTimeDto;
+import org.example.app.dto.RegisterUserDto;
 import org.example.app.dto.UserDto;
 import org.example.app.security.UserPrincipal;
 import org.example.app.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -57,18 +59,19 @@ public class StudentController {
 
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
     @GetMapping("/student/cancel-lesson/{id}")
-    public ResponseEntity<List<UserDto>> cancelLessonsBooking(@PathVariable Long id,
+    public ResponseEntity cancelLessonsBooking(@PathVariable Long id,
                                                               @ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
         bookedLessonsService.cancelBookedLesson(id, principal.getUser().getId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping ("/approve-cancel-lesson/{id}")
-    public ResponseEntity<List<UserDto>> approveCancelLessonOperation(@PathVariable Long id) {
+    public ResponseEntity approveCancelLessonOperation(@PathVariable Long id) {
         bookedLessonsService.approveCancelLessonOperation(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
     @GetMapping("/student/{teacherId}/free-time")
     public ResponseEntity<List<FreeTimeDto>> getTeacherFreeTime(@PathVariable Long teacherId) {
