@@ -81,5 +81,12 @@ public class StudentController {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getAllTeachers());
     }
 
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
+    @GetMapping("/student/{lessonId}/fullPrize")
+    public ResponseEntity<Double> getLessonFullPrize(@PathVariable Long lessonId,
+                                                            @ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
+        return ResponseEntity.status(HttpStatus.OK).
+                body(bookedLessonsService.getFullPrizeForBookedLesson(lessonId,principal.getUser().getId()));
+    }
 
 }

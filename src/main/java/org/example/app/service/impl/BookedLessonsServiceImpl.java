@@ -21,8 +21,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Time;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -105,19 +107,36 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
 
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     public void cancelBookedLesson(Long lessonId, Long studentId) {
+        sendEmailForCancelingBookedLesson( getLessonsByStudentIdAndTeacherId(lessonId,studentId));
+    }
 
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    public Double getFullPrizeForBookedLesson(Long lessonId, Long studentId){
+        BookedLesson bookedLesson = getLessonsByStudentIdAndTeacherId(lessonId,studentId);
+        Long lessonDuration = getDateDiff(bookedLesson.getTimeFrom(),bookedLesson.getTimeTo(),TimeUnit.MINUTES);
+        return (lessonDuration.doubleValue()*bookedLesson.getTeacher().getPrize().getPrize())
+                /bookedLesson.getTeacher().getPrize().getAmountOfTime();
+    }
+    private long getDateDiff(Time date1, Time date2, TimeUnit timeUnit) {
+        long diffInMillies = date2.getTime() - date1.getTime();
+        return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+    }
+    private BookedLesson getLessonsByStudentIdAndTeacherId(Long lessonId, Long studentId){
         BookedLesson bookedLesson = findById(lessonId);
         if (bookedLesson.getStudent().getId() != studentId) {
-            throw new NotFoundException(String.format("Student with id %s does not have booked lessons with id %s", studentId, lessonId));
+            throw new NotFoundException(String.format(
+                    "Student with id %s does not have booked lessons with id %s", studentId, lessonId));
         }
-        sendEmailForCancelingBookedLesson(bookedLesson);
+        return bookedLesson;
     }
 
     private void sendEmailForCancelingBookedLesson(BookedLesson bookedLesson) {
         String text = String.format("You have just send request for canceling lesson with teacher %s %s on %s at %s-%s",
-                bookedLesson.getTeacher().getFirstName(), bookedLesson.getTeacher().getLastName(), bookedLesson.getDate(), bookedLesson.getTimeFrom(), bookedLesson.getTimeTo());
+                bookedLesson.getTeacher().getFirstName(), bookedLesson.getTeacher().getLastName(),
+                bookedLesson.getDate(), bookedLesson.getTimeFrom(), bookedLesson.getTimeTo());
         emailSender.sendEmail("Cancel lesson", text +
-                        "<form method=\"GET\" action=\"" + linkTo(methodOn(StudentController.class).approveCancelLessonOperation(bookedLesson.getId())) + "\">" +
+                        "<form method=\"GET\" action=\"" + linkTo(methodOn(StudentController.class).
+                        approveCancelLessonOperation(bookedLesson.getId())) + "\">" +
                         "<input type=\"submit\" value=\"Cancel\"/></form>",
                 bookedLesson.getStudent().getEmail());
     }

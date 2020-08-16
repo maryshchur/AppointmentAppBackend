@@ -10,6 +10,7 @@ public interface BookedLessonsService {
     void declineLessonsBooking(Long lessonId);
     void cancelBookedLesson(Long lessonId, Long studentId);
     void approveCancelLessonOperation(Long lessonId);
+    Double getFullPrizeForBookedLesson(Long lessonId, Long studentId);
     List<BookedLessonDto> getByStudentId(Long id);
     List<BookedLessonDto> getByTeacherId(Long id);
 }
