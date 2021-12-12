@@ -3,12 +3,13 @@ package org.example.app.service.impl;
 import org.example.app.controller.StudentController;
 import org.example.app.controller.TeacherController;
 import org.example.app.dto.BookedLessonDto;
+import org.example.app.dto.BookedLessonsViewDto;
 import org.example.app.dto.FreeTimeDto;
-import org.example.app.dto.RegisterUserDto;
 import org.example.app.dto.UserDto;
 import org.example.app.entities.BookedLesson;
 import org.example.app.entities.FreeTime;
-import org.example.app.entities.User;
+import org.example.app.entities.Student;
+import org.example.app.entities.Teacher;
 import org.example.app.exeptions.NotFoundException;
 import org.example.app.repository.BookedLessonRepository;
 import org.example.app.repository.FreeTimeRepository;
@@ -38,10 +39,11 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
     private FreeTimeRepository freeTimeRepository;
     private UserService userService;
     private final EmailSender emailSender;
-    private final ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public BookedLessonsServiceImpl(FreeTimeRepository freeTimeRepository, FreeTimeService freeTimeService, EmailSender emailSender, BookedLessonRepository bookedLessonRepository, UserService userService) {
+    public BookedLessonsServiceImpl(ModelMapper modelMapper, FreeTimeRepository freeTimeRepository, FreeTimeService freeTimeService, EmailSender emailSender, BookedLessonRepository bookedLessonRepository, UserService userService) {
+        this.modelMapper = modelMapper;
         this.freeTimeRepository = freeTimeRepository;
         this.freeTimeService = freeTimeService;
         this.emailSender = emailSender;
@@ -51,32 +53,32 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
 
     @Transactional
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public void bookLesson(BookedLessonDto bookedLessonDto, String email) {
+    public void bookLesson(BookedLessonDto bookedLessonDto, String email) throws Throwable {
         UserDto teacher = userService.getUserByEmail(bookedLessonDto.getTeacher().getEmail());
         UserDto student = userService.getUserByEmail(email);
 
-        bookedLessonDto.setTeacher(modelMapper.map(teacher, User.class));
+        bookedLessonDto.setTeacher(modelMapper.map(teacher, Teacher.class));
         BookedLesson bookedLesson = modelMapper.map(bookedLessonDto, BookedLesson.class);
-        bookedLesson.setStudent(modelMapper.map(student, User.class));
-        bookedLesson.setAproved(false);
+        bookedLesson.setStudent(modelMapper.map(student, Student.class));
+        bookedLesson.setApproved(false);
         sendEmailForApproving(bookedLessonRepository.save(bookedLesson));
     }
 
-    private void sendEmailForApproving(BookedLesson bookedLesson) {
+    private void sendEmailForApproving(BookedLesson bookedLesson) throws Throwable {
         String text = String.format("You have just received new lesson's request by %s %s on %s at %s-%s",
                 bookedLesson.getStudent().getFirstName(), bookedLesson.getStudent().getLastName(), bookedLesson.getDate(), bookedLesson.getTimeFrom(), bookedLesson.getTimeTo());
         emailSender.sendEmail("Lesson's request", text +
-                        "<form method=\"GET\" action=\"" + linkTo(methodOn(TeacherController.class).approveBooking(bookedLesson.getId())) + "\">" +
+                        "<div><form method=\"GET\" action=\"" + linkTo(methodOn(TeacherController.class).approveBooking(bookedLesson.getId())) + "\">" +
                         "<input type=\"submit\" value=\"Approve\"/></form>" +
                         "<form method=\"GET\" action=\"" + linkTo(methodOn(TeacherController.class).declineBooking(bookedLesson.getId())) + "\">" +
-                        "<input type=\"submit\" value=\"Decline\"/> </form>\"",
+                        "<input type=\"submit\" value=\"Decline\"/> </form></div>",
                 bookedLesson.getTeacher().getEmail());
     }
 
     @Transactional
-    public void approveLessonsBooking(Long lessonId) {
+    public void approveLessonsBooking(Long lessonId) throws Throwable {
         BookedLesson bookedLesson = findById(lessonId);
-        bookedLesson.setAproved(true);
+        bookedLesson.setApproved(true);
         changeFreeTime(bookedLesson, userService.getUserByEmail(bookedLesson.getTeacher().getEmail()));
         bookedLessonRepository.save(bookedLesson);
 
@@ -86,7 +88,7 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
         bookedLessonRepository.deleteById(lessonId);
     }
 
-    private void changeFreeTime(BookedLesson bookedLesson, UserDto teacher) {
+    private void changeFreeTime(BookedLesson bookedLesson, UserDto teacher) throws Throwable {
         FreeTimeDto freeTimeDto = getBookedTimeRange(bookedLesson, teacher);
         if (!freeTimeDto.getTimeFrom().equals(bookedLesson.getTimeFrom())) {
             freeTimeService.save(new FreeTimeDto(bookedLesson.getDate(), freeTimeDto.getTimeFrom(),
@@ -107,17 +109,17 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
     }
 
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public void cancelBookedLesson(Long lessonId, Long studentId) {
+    public void cancelBookedLesson(Long lessonId, Long studentId) throws Throwable {
         sendEmailForCancelingBookedLesson(getLessonsByStudentIdAndTeacherId(lessonId, studentId));
     }
 
-    @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public int getFullPrizeForBookedLesson(Long lessonId, Long studentId) {
-        BookedLesson bookedLesson = getLessonsByStudentIdAndTeacherId(lessonId, studentId);
-        Long lessonDuration = getDateDiff(bookedLesson.getTimeFrom(), bookedLesson.getTimeTo(), TimeUnit.MINUTES);
-        return (int) Math.round((lessonDuration.doubleValue() * bookedLesson.getTeacher().getPrize().getPrize())
-                / bookedLesson.getTeacher().getPrize().getAmountOfTime());
-    }
+//    @PreAuthorize("hasRole('ROLE_STUDENT')")
+//    public int getFullPrizeForBookedLesson(Long lessonId, Long studentId) {
+//        BookedLesson bookedLesson = getLessonsByStudentIdAndTeacherId(lessonId, studentId);
+//        Long lessonDuration = getDateDiff(bookedLesson.getTimeFrom(), bookedLesson.getTimeTo(), TimeUnit.MINUTES);
+//        return (int) Math.round((lessonDuration.doubleValue() * bookedLesson.getTeacher().getPrize().getPrize())
+//                / bookedLesson.getTeacher().getPrize().getAmountOfTime());
+//    }
 
     private long getDateDiff(Time date1, Time date2, TimeUnit timeUnit) {
         long diffInMillies = date2.getTime() - date1.getTime();
@@ -133,7 +135,7 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
         return bookedLesson;
     }
 
-    private void sendEmailForCancelingBookedLesson(BookedLesson bookedLesson) {
+    private void sendEmailForCancelingBookedLesson(BookedLesson bookedLesson) throws Throwable {
         String text = String.format("You have just send request for canceling lesson with teacher %s %s on %s at %s-%s",
                 bookedLesson.getTeacher().getFirstName(), bookedLesson.getTeacher().getLastName(),
                 bookedLesson.getDate(), bookedLesson.getTimeFrom(), bookedLesson.getTimeTo());
@@ -144,16 +146,16 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
                 bookedLesson.getStudent().getEmail());
     }
 
-    public void approveCancelLessonOperation(Long lessonId) {
+    public void approveCancelLessonOperation(Long lessonId) throws Throwable {
         BookedLesson bookedLesson = findById(lessonId);
         bookedLessonRepository.deleteById(lessonId);
-        if (bookedLesson.isAproved()) {
+        if (bookedLesson.isApproved()) {
             saveCancelLessonTimeToTeacherFreeTime(bookedLesson);
         }
     }
 
-    private void saveCancelLessonTimeToTeacherFreeTime(BookedLesson bookedLesson) {
-        List<FreeTime> existFreeTimeWithSameBoundary = freeTimeRepository.findByUserIdAndDateAndTimeFromEqualsOrTimeToEquals(
+    private void saveCancelLessonTimeToTeacherFreeTime(BookedLesson bookedLesson) throws Throwable {
+        List<FreeTime> existFreeTimeWithSameBoundary = freeTimeRepository.findByTeacherIdAndDateAndTimeFromEqualsOrTimeToEquals(
                 bookedLesson.getTeacher().getId(), bookedLesson.getDate(), bookedLesson.getTimeTo(), bookedLesson.getTimeFrom());
         if (!existFreeTimeWithSameBoundary.isEmpty()) {
             mergeTimeRangesIntoOne(bookedLesson, existFreeTimeWithSameBoundary);
@@ -163,7 +165,7 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
         }
     }
 
-    private void mergeTimeRangesIntoOne(BookedLesson bookedLesson, List<FreeTime> existFreeTimeWithSameBoundary) {
+    private void mergeTimeRangesIntoOne(BookedLesson bookedLesson, List<FreeTime> existFreeTimeWithSameBoundary) throws Throwable {
         if (existFreeTimeWithSameBoundary.size() == 2) {
             existFreeTimeWithSameBoundary = existFreeTimeWithSameBoundary.stream().sorted(Comparator.comparing(FreeTime::getTimeFrom)).collect(Collectors.toList());
             FreeTime f1 = existFreeTimeWithSameBoundary.get(0);
@@ -194,23 +196,23 @@ public class BookedLessonsServiceImpl implements BookedLessonsService {
     }
 
     @PreAuthorize("hasRole('ROLE_STUDENT')")
-    public List<BookedLessonDto> getByStudentId(Long id) {
+    public List<BookedLessonsViewDto> getByStudentId(Long id) {
         List<BookedLesson> bookedLesson = bookedLessonRepository.getByStudentId(id);
         return checkIfEmptyAndMapToDto("The student has no booked lesson", bookedLesson);
     }
 
     @PreAuthorize("hasRole('ROLE_TEACHER')")
-    public List<BookedLessonDto> getByTeacherId(Long id) {
-        List<BookedLesson> bookedLesson = bookedLessonRepository.getByTeacherId(id);
-        return checkIfEmptyAndMapToDto("The teacher has no booked lesson", bookedLesson);
+    public List<BookedLessonsViewDto> getLessonsByTeacherId(Long id,boolean isApproved) {
+        List<BookedLesson> bookedLesson = bookedLessonRepository.getByTeacher_IdAndApproved(id,isApproved);
+        return checkIfEmptyAndMapToDto("You have no booked lesson", bookedLesson);
     }
 
-    private List<BookedLessonDto> checkIfEmptyAndMapToDto(String errorMessage, List<BookedLesson> bookedLesson) {
+    private List<BookedLessonsViewDto> checkIfEmptyAndMapToDto(String errorMessage, List<BookedLesson> bookedLesson) {
         if (bookedLesson.isEmpty()) {
             throw new NotFoundException(errorMessage);
         }
         return bookedLesson.stream().
-                map(x -> modelMapper.map(x, BookedLessonDto.class)).collect(Collectors.toList());
+                map(x -> modelMapper.map(x, BookedLessonsViewDto.class)).collect(Collectors.toList());
     }
 
 }

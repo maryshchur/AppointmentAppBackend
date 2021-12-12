@@ -1,5 +1,6 @@
 package org.example.app.util.validator;
 
+import lombok.SneakyThrows;
 import org.example.app.dto.RegisterUserDto;
 import org.example.app.dto.UserDto;
 import org.example.app.entities.User;
@@ -35,6 +36,7 @@ public class AvailableTimeRangeValidator implements ConstraintValidator<IsAvaila
         teacher = isAvailableTimeRange.teacher();
     }
 
+    @SneakyThrows
     @Override
     public boolean isValid(Object o, ConstraintValidatorContext constraintValidatorContext) {
             final Object firstObj = new BeanWrapperImpl(o).getPropertyValue( timeFrom);
@@ -44,7 +46,7 @@ public class AvailableTimeRangeValidator implements ConstraintValidator<IsAvaila
             User u=(User) fourObj;
             UserDto user = userService.getUserByEmail(u.getEmail());
             return !(freeTimeRepository.
-                    findByUserIdAndDateAndTimeFromLessThanEqualAndTimeToGreaterThanEqual
+                    findByTeacherIdAndDateAndTimeFromLessThanEqualAndTimeToGreaterThanEqual
                             (user.getId(), LocalDate.parse(thirdObj.toString()),
                                     Time.valueOf(firstObj.toString()),
                                     Time.valueOf(secondObj.toString())).isEmpty());

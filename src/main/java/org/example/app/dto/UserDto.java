@@ -18,6 +18,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class UserDto  {
     private Long id;
+    private String image;
     public String firstName;
 
     public String lastName;
@@ -29,6 +30,7 @@ public class UserDto  {
     private boolean enabled;
 
     public Role role;
-    private Prize prize;
+
+    private String description;
 
 }

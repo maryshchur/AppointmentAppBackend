@@ -1,12 +1,10 @@
 package org.example.app.entities;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
@@ -24,14 +22,14 @@ public class VerificationToken {
 
     private Timestamp expiryDate;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public VerificationToken(String token,User user) {
-        this.token=token;
-        this.user=user;
-        expiryDate=calculateExpiryDate(EXPIRATION);
+    public VerificationToken(String token, User user) {
+        this.token = token;
+        this.user = user;
+        expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
     private Timestamp calculateExpiryDate(int registrationTokenExpiryTimeInMinutes) {

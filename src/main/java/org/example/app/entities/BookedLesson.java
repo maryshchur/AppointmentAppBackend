@@ -34,6 +34,6 @@ public class BookedLesson {
 
     private Time timeTo;
 
-    private boolean aproved;
+    private boolean approved;
 }
 

@@ -1,11 +1,12 @@
 package org.example.app.security.config;
 
+import org.example.app.security.JwtAuthenticationEntryPoint;
+import org.example.app.security.TokenManagementService;
 import org.example.app.security.UserPrincipalDetailsService;
+import org.example.app.security.filter.JwtAuthorizationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -23,20 +25,28 @@ import org.springframework.security.crypto.password.PasswordEncoder;
         jsr250Enabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private TokenManagementService tokenManagementService;
     private UserPrincipalDetailsService userPrincipalDetailsService;
+    private JwtAuthenticationEntryPoint unauthorizedHandler;
 
     @Autowired
-    public WebSecurityConfig(UserPrincipalDetailsService userPrincipalDetailsService) {
+    public WebSecurityConfig(TokenManagementService tokenManagementService,
+                             UserPrincipalDetailsService userPrincipalDetailsService,
+                             JwtAuthenticationEntryPoint unauthorizedHandler) {
+        this.tokenManagementService = tokenManagementService;
         this.userPrincipalDetailsService = userPrincipalDetailsService;
+        this.unauthorizedHandler = unauthorizedHandler;
     }
 
     private static final String[] AUTH_WHITELIST = {
             "/registration",
+           "/registration-teacher",
             "/authentication",
             "/approve-cancel-lesson/",
-            "/approve-booking/",
-            "/decline-booking/",
-            "/registration-confirm"
+            "/approve-booking/**",
+            "/decline-booking/**",
+            "/registration-confirm",
+            "/upload-photo/**"
 
     };
 
@@ -45,11 +55,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.cors().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeRequests()
-               .antMatchers(AUTH_WHITELIST).permitAll()
+                .and().csrf().disable()
+                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
                 .and()
-                .csrf().disable()
-        ;
+                .authorizeRequests()
+                .antMatchers(AUTH_WHITELIST).permitAll()
+                .anyRequest().authenticated();
+        http
+                .addFilterBefore(new JwtAuthorizationFilter(tokenManagementService), UsernamePasswordAuthenticationFilter.class);
+
     }
 
 

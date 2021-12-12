@@ -39,7 +39,7 @@ public class CrossTimeRangeValidationServiceImpl implements
      */
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     @Override
-    public void checkIfTimeRangeSlotIsUnique(FreeTimeDto freeTimeDto, String email) {
+    public void checkIfTimeRangeSlotIsUnique(FreeTimeDto freeTimeDto, String email) throws Throwable {
         List<FreeTimeDto> allFreeDates = getAllTeachersFreeHoursOnSelectedDay(email,
                 freeTimeDto);
         if ((!allFreeDates.isEmpty()) && allFreeDates.stream().anyMatch(h -> isNotUnique(freeTimeDto.getTimeFrom(),
@@ -50,7 +50,7 @@ public class CrossTimeRangeValidationServiceImpl implements
 
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     @Override
-    public void checkIfTimeRangeSlotIsUnique(BookedLessonDto bookedLessonDto, Long studentId) {
+    public void checkIfTimeRangeSlotIsUnique(BookedLessonDto bookedLessonDto, Long studentId) throws Throwable {
         List<BookedLesson> allBookedLessonsInStudent = bookedLessonRepository.
                 findByStudentIdAndDate(studentId,
                         bookedLessonDto.getDate());
@@ -88,7 +88,7 @@ public class CrossTimeRangeValidationServiceImpl implements
      * @param freeTimeDto {@link FreeTimeDto}
      * @return list of all {@link FreeTimeDto}
      */
-    private List<FreeTimeDto> getAllTeachersFreeHoursOnSelectedDay(String email, FreeTimeDto freeTimeDto) {
+    private List<FreeTimeDto> getAllTeachersFreeHoursOnSelectedDay(String email, FreeTimeDto freeTimeDto) throws Throwable {
         return freeTimeService.getTeacherFreeTimeByData(userService.getUserByEmail(email).getId(),
                 freeTimeDto.getDate());
     }

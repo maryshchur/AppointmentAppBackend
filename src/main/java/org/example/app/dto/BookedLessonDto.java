@@ -3,6 +3,7 @@ package org.example.app.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.app.entities.Teacher;
 import org.example.app.entities.User;
 import org.example.app.util.validator.IsAvailableTimeRange;
 import org.example.app.util.validator.IsValidTimeRange;
@@ -21,7 +22,7 @@ import java.time.LocalDate;
 public class BookedLessonDto extends RepresentationModel<BookedLessonDto> {
     private Long id;
     @NotNull
-    private User teacher;
+    private Teacher teacher;
     @NotNull
     @FutureOrPresent
     private LocalDate date;

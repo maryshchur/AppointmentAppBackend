@@ -18,6 +18,6 @@ public class EmailValidator implements ConstraintValidator<EmailExist, String> {
 
     @Override
     public boolean isValid(String email, ConstraintValidatorContext context) {
-        return userRepository.existsUserByEmail(email.trim().toLowerCase()) ? false : true;
+        return !userRepository.findUserByEmail(email.trim().toLowerCase()).isPresent();
     }
 }

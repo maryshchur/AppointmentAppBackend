@@ -5,6 +5,7 @@ import org.example.app.dto.RegisterUserDto;
 import org.example.app.dto.UserDto;
 import org.example.app.entities.User;
 import org.example.app.exeptions.BadCredentialException;
+import org.example.app.exeptions.NotFoundException;
 import org.example.app.repository.UserRepository;
 import org.example.app.security.config.WebSecurityConfig;
 import org.example.app.service.impl.UserServiceImpl;
@@ -35,7 +36,7 @@ public class AuthenticationService {
 
         Optional<User> user = userRepository.findUserByEmail(loginUser.getEmail());
         PasswordEncoder passwordEncoder = webSecurityConfig.passwordEncoder();
-        if (passwordEncoder.matches(loginUser.getPassword(), user.get().getPassword())) {
+        if (user. isPresent()  && passwordEncoder.matches(loginUser.getPassword(), user.get().getPassword())) {
             if (!user.get().isEnabled()) {
                 throw new DisabledException("Account is not active");
             }
@@ -43,5 +44,6 @@ public class AuthenticationService {
         } else {
             throw new BadCredentialException("BAD CREDENTIAL");
         }
+
     }
 }

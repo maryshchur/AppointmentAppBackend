@@ -2,6 +2,7 @@ package org.example.app.service.impl;
 
 import org.example.app.dto.PrizeDto;
 import org.example.app.dto.RegisterUserDto;
+import org.example.app.dto.TeacherDto;
 import org.example.app.dto.UserDto;
 import org.example.app.entities.Prize;
 import org.example.app.entities.User;
@@ -29,15 +30,15 @@ public class PrizeServiceImpl implements PrizeService {
 
     @PreAuthorize("hasRole('ROLE_TEACHER')")
     @Override
-    public void setPrize(PrizeDto prizeDto, String email) {
-        UserDto userDto = userService.getUserByEmail(email);
-        if (userDto.getPrize().getId() != null) {
-            prizeDto.setId(userDto.getPrize().getId());
-            prizeRepository.save(modelMapper.map(prizeDto, Prize.class));
-        } else {
-            userDto.setPrize(prizeRepository.save(modelMapper.map(prizeDto, Prize.class)));
-            userService.saveOrUpdate(modelMapper.map(userDto, User.class));
-        }
+    public void setPrize(PrizeDto prizeDto, String email) throws Throwable {
+//        TeacherDto userDto = userService.getUserByEmail(email);
+//        if (userDto.getPrize().getId() != null) {
+//            prizeDto.setId(userDto.getPrize().getId());
+//            prizeRepository.save(modelMapper.map(prizeDto, Prize.class));
+//        } else {
+//            userDto.setPrize(prizeRepository.save(modelMapper.map(prizeDto, Prize.class)));
+//            userService.saveOrUpdate(modelMapper.map(userDto, User.class));
+//        }
     }
 
     @Override

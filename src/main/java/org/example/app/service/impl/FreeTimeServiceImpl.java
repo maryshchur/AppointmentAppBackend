@@ -1,5 +1,6 @@
 package org.example.app.service.impl;
 
+import org.example.app.dto.AvailableTeachersHoursDto;
 import org.example.app.dto.FreeTimeDto;
 import org.example.app.entities.FreeTime;
 import org.example.app.entities.User;
@@ -21,35 +22,36 @@ import java.util.stream.Collectors;
 public class FreeTimeServiceImpl implements FreeTimeService {
     private FreeTimeRepository freeTimeRepository;
     private UserService userService;
-    private final ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public FreeTimeServiceImpl(FreeTimeRepository freeTimeRepository, UserService userService) {
+    public FreeTimeServiceImpl(FreeTimeRepository freeTimeRepository, UserService userService, ModelMapper modelMapper) {
         this.freeTimeRepository = freeTimeRepository;
         this.userService = userService;
+        this.modelMapper = modelMapper;
     }
 
     //@PreAuthorize("hasRole('ROLE_TEACHER')")
-    public void save(FreeTimeDto freeTimeDto, String email) {
+    public void save(FreeTimeDto freeTimeDto, String email) throws Throwable {
         FreeTime freeTime = modelMapper.map(freeTimeDto, FreeTime.class);
-        freeTime.setUser(modelMapper.map(userService.getUserByEmail(email), User.class));
+        freeTime.setTeacher(modelMapper.map(userService.getUserByEmail(email), User.class));
         freeTimeRepository.save(freeTime);
     }
 
     @Secured({"ROLE_TEACHER", "ROLE_STUDENT"})
-    public List<FreeTimeDto> getTeacherFreeTimes(Long teacherId) {
-        List<FreeTimeDto> freeTimeDtos= freeTimeRepository.getByUserId(teacherId).stream().
+    public List<AvailableTeachersHoursDto> getTeacherFreeTimes(Long teacherId) {
+        List<AvailableTeachersHoursDto> freeTimeDtos = freeTimeRepository.getByTeacherId(teacherId).stream().
                 sorted(Comparator.comparing(FreeTime::getDate)).
-                map(x -> modelMapper.map(x, FreeTimeDto.class)).
+                map(x -> modelMapper.map(x, AvailableTeachersHoursDto.class)).
                 collect(Collectors.toList());
-        if(freeTimeDtos.isEmpty()){
-            throw new NotFoundException(String.format("Teacher with id %s has no free hours",teacherId));
+        if (freeTimeDtos.isEmpty()) {
+            throw new NotFoundException(String.format("Teacher with id %s has no free hours", teacherId));
         }
         return freeTimeDtos;
     }
 
     public List<FreeTimeDto> getTeacherFreeTimeByData(Long id, LocalDate date) {
-        return freeTimeRepository.getByUserIdAndDate(id, date).stream().
+        return freeTimeRepository.getByTeacherIdAndDate(id, date).stream().
                 map(x -> modelMapper.map(x, FreeTimeDto.class)).
                 collect(Collectors.toList());
     }
@@ -58,7 +60,6 @@ public class FreeTimeServiceImpl implements FreeTimeService {
     public void delete(Long id) {
         freeTimeRepository.deleteById(id);
     }
-
 
 
 }

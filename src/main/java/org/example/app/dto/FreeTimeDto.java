@@ -20,9 +20,9 @@ public class FreeTimeDto {
     @NotNull
     @FutureOrPresent
     private LocalDate date;
-    @NotNull(message ="TimeTo field may not be null")
+    @NotNull(message = "TimeTo field may not be null")
     private Time timeFrom;
-    @NotNull(message ="TimeTo field may not be null")
+    @NotNull(message = "TimeTo field may not be null")
     private Time timeTo;
 
     public FreeTimeDto(LocalDate date, Time timeFrom, Time timeTo) {

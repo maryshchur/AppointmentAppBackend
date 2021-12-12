@@ -16,7 +16,8 @@ public interface BookedLessonRepository extends JpaRepository<BookedLesson, Long
 
     List<BookedLesson> getByStudentId(Long id);
 
-    List<BookedLesson> getByTeacherId(Long id);
+    List<BookedLesson> getByTeacher_Id(Long id);
+    List<BookedLesson> getByTeacher_IdAndApproved(Long id,boolean isApproved);
 
     @Override
     Optional<BookedLesson> findById(Long aLong);

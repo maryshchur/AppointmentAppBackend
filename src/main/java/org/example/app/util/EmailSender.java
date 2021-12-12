@@ -31,7 +31,7 @@ public class EmailSender {
             helper.setText("<html><body><h3>" + text +"</h3> </body></html>", true);
             mailSender.send(mailMessage);
         } catch (MessagingException | MailException e) {
-            //LOG.error("Can not send email: " + e.getMessage());
+            //do smth, console log for example
         }
     }
 }

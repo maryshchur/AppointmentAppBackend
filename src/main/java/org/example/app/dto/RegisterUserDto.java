@@ -16,7 +16,7 @@ import javax.validation.constraints.Size;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@PasswordMatch(password = "password",confPassword = "confPassword")
+//@PasswordMatch(password = "password",confPassword = "confPassword")
 public class RegisterUserDto {
 
     @NotBlank(message = ValidationErrorConstants.EMPTY_FIRSTNAME)
@@ -36,10 +36,10 @@ public class RegisterUserDto {
     @NotBlank
 
     private String password;
-    @NotBlank
-    private String confPassword;
+//    @NotBlank
+//    private String confPassword;
 
-    @NotNull
-    public Role role;
+//    @NotNull
+//    public Role role;
 
 }

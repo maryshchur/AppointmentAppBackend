@@ -1,5 +1,6 @@
 package org.example.app.event;
 
+import lombok.SneakyThrows;
 import org.example.app.controller.UserController;
 import org.example.app.dto.RegisterUserDto;
 import org.example.app.service.UserService;
@@ -25,12 +26,13 @@ public class RegistrationEmailListener implements ApplicationListener<OnRegistra
         this.emailSender=emailSender;
     }
 
+    @SneakyThrows
     @Override
     public void onApplicationEvent(OnRegistrationSuccessEvent onRegistrationSuccessEvent) {
         confirmRegistration(onRegistrationSuccessEvent);
     }
 
-    private void confirmRegistration(OnRegistrationSuccessEvent event){
+    private void confirmRegistration(OnRegistrationSuccessEvent event) throws Throwable {
         RegisterUserDto user = event.getUser();
         String token = UUID.randomUUID().toString();
         userService.createVerificationToken(user,token);

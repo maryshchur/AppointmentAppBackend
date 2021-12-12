@@ -2,21 +2,29 @@ package org.example.app.repository;
 
 import org.example.app.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.NoRepositoryBean;
 
-import java.util.List;
 import java.util.Optional;
 
-@Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+//@NoRepositoryBean
+public interface UserRepository<T extends User> extends JpaRepository<T , Long> {
 
-    User save(User user);
+    T save(T user);
 
-    Optional<User> findUserByEmail(String email);
+    @Query("select u from #{#entityName} as u where u.email = ?1 ")
+    Optional<T> findUserByEmail(String email);
 
-    Optional<User> findById(Long id);
+    @Query("select u from #{#entityName} as u where u.id = ?1 ")
+    Optional<T> findById(Long id);
 
-    boolean existsUserByEmail(String email);
+    //@Modifying
+    @Query("select r.name from Role r join #{#entityName} as u on  u.role = r.id where u.id = ?1")
+    String getUserRoleById(Long id);
 
-    List<User> findAllByRoleId(Long role);
+//    @Query("select u from #{#entityName} as u where u.email = ?1 ")
+//    boolean existsUserByEmail(String email);
+
+    // List<T> findAllByRoleId(Long role);
 }

@@ -1,5 +1,6 @@
 package org.example.app.security;
 
+import lombok.SneakyThrows;
 import org.example.app.entities.User;
 import org.example.app.exeptions.NotFoundException;
 import org.example.app.repository.UserRepository;
@@ -15,9 +16,11 @@ public class UserPrincipalDetailsService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    @SneakyThrows
     @Override
     public UserDetails loadUserByUsername(String username) {
-        User user = userRepository.findUserByEmail(username).orElseThrow(
+        User user = (User) userRepository.findUserByEmail(username)
+                .orElseThrow(
                 () -> new NotFoundException("User does not exist"));
         return UserPrincipal.create(user);
     }
