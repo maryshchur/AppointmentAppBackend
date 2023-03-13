@@ -115,6 +115,13 @@ public class UserServiceImpl implements UserService {
         //todo add some kind of sorting
 //        Sort.Direction.DESC, "id");
         Page<TeacherDto> teachersPage = teacherRepository.findAll(pageable).map(teacher -> modelMapper.map(teacher, TeacherDto.class));
+        System.out.println("teachersPage");
+        for (TeacherDto p: teachersPage){
+            System.out.println("TeacherDto");
+            System.out.println(p.getImage());
+//            System.out.println(p.getImageUrl());
+        }
+        System.out.println(teachersPage);
         if (teachersPage.isEmpty()) {
             throw new NotFoundException("There is no teachers");
         }
@@ -176,6 +183,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public String getRole(Long id){
         return userRepository.getUserRoleById(id);
+    }
+
+    @Override
+    public <T extends UserDto> Set<T> getSubscriptions(Long id) throws Throwable {
+        return (Set<T>) ((Student)getUserById(id)).getSubscriptions().stream()
+                .map(x->modelMapper.map(x,TeacherDto.class))
+                .collect(Collectors.toSet());
     }
 
 }

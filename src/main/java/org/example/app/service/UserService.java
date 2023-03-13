@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Set;
 
 public interface UserService {
     Long register(RegisterUserDto registerUserDto);
@@ -34,5 +35,7 @@ public interface UserService {
     void confirmRegistration(String token) throws Throwable;
 
     String getRole(Long id);
+
+    <T extends UserDto> Set<T> getSubscriptions(Long id) throws Throwable;
 }
 

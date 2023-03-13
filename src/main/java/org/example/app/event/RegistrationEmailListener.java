@@ -7,6 +7,8 @@ import org.example.app.service.UserService;
 import org.example.app.util.EmailSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -15,7 +17,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class RegistrationEmailListener implements ApplicationListener<OnRegistrationSuccessEvent> {
+public class RegistrationEmailListener {
+        //implements ApplicationListener<OnRegistrationSuccessEvent> {
 
     private UserService userService;
     private final EmailSender emailSender;
@@ -27,7 +30,8 @@ public class RegistrationEmailListener implements ApplicationListener<OnRegistra
     }
 
     @SneakyThrows
-    @Override
+    @Async
+    @EventListener
     public void onApplicationEvent(OnRegistrationSuccessEvent onRegistrationSuccessEvent) {
         confirmRegistration(onRegistrationSuccessEvent);
     }

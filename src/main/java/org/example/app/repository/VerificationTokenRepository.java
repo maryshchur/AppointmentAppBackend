@@ -19,6 +19,7 @@ public interface VerificationTokenRepository extends JpaRepository<VerificationT
     Optional<VerificationToken> findByToken(String token);
 
     void deleteById(Long aLong);
+
     void deleteAllByExpiryDateIsLessThanEqual(Date now);
     //todo delete custom query and change method name and test it
     @Modifying

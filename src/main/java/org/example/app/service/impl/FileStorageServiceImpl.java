@@ -23,8 +23,8 @@ import java.util.UUID;
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
     private AmazonS3 s3client;
-    @Value("${BUCKET_NAME}")
-    private String bucketName;
+//    @Value("${BUCKET_NAME}")
+    private String bucketName="announcementapp";
     //@Value("${ACCESS_KEY}")
     private String accessKey = "AKIAJ4GGZQ4SA2DBYUAA";
     // @Value("${SECRET_ACCESS_KEY}")
@@ -35,7 +35,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     private void initializeAmazon() {
         AWSCredentials credentials = new BasicAWSCredentials(accessKey, secretAccessKey);
         s3client = AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+                .withCredentials(new AWSStaticCredentialsProvider(credentials)).withRegion("eu-central-1").build();
     }
 
     private File convertMultipartToFile(MultipartFile multipartFile) throws IOException {

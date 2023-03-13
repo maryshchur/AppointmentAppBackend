@@ -2,6 +2,8 @@ package org.example.app.event;
 
 import org.example.app.dto.RegisterUserDto;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.stereotype.Component;
+
 
 public class OnRegistrationSuccessEvent extends ApplicationEvent {
     private static final long serialVersionUID = 1L;

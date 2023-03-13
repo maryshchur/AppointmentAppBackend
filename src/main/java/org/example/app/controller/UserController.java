@@ -1,6 +1,7 @@
 package org.example.app.controller;
 
 
+import lombok.RequiredArgsConstructor;
 import org.example.app.dto.LoginedUser;
 import org.example.app.dto.RegisterTeacherDto;
 import org.example.app.dto.RegisterUserDto;
@@ -30,6 +31,7 @@ import javax.validation.Valid;
 @RestController
 @Validated
 @CrossOrigin(origins = "http://localhost:3000")
+//@RequiredArgsConstructor
 public class UserController<T extends UserDto> {
     private AuthenticationService authenticationService;
     private TokenManagementService tokenManagementService;
@@ -64,12 +66,12 @@ public class UserController<T extends UserDto> {
         return ResponseEntity.status(HttpStatus.CREATED).body(id);
     }
 
-    @PutMapping("/upload-photo/{id}")
-    public ResponseEntity changePhoto(@RequestPart(value = "file") MultipartFile file,
-                                      @PathVariable Long id) throws Throwable {
-        userService.changePhoto(file, id);
-        return ResponseEntity.status(HttpStatus.OK).build();
-    }
+//    @PutMapping("/upload-photo/{id}")
+//    public ResponseEntity changePhoto(@RequestPart(value = "file") MultipartFile file,
+//                                      @PathVariable Long id) throws Throwable {
+//        userService.changePhoto(file, id);
+//        return ResponseEntity.status(HttpStatus.OK).build();
+//    }
 
     @GetMapping("/registration-confirm")
     public ResponseEntity confirmRegistration(@RequestParam("token") String token) throws Throwable {
@@ -91,12 +93,12 @@ public class UserController<T extends UserDto> {
     }
 
     @GetMapping("/user-role")
-    public ResponseEntity<String> getCurrentUserRole(@ApiIgnore @AuthenticationPrincipal UserPrincipal principal){
+    public ResponseEntity<String> getCurrentUserRole(@ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getRole(principal.getUser().getId()));
     }
 
     @GetMapping("/profile")
-    public ResponseEntity<T> getProfileData(@ApiIgnore @AuthenticationPrincipal UserPrincipal principal){
+    public ResponseEntity<T> getProfileData(@ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUserData(principal.getUser().getId()));
     }
 

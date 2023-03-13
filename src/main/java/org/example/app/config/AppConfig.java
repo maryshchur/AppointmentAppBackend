@@ -2,14 +2,17 @@ package org.example.app.config;
 
 import org.example.app.dto.AvailableTeachersHoursDto;
 import org.example.app.dto.BookedLessonsViewDto;
+import org.example.app.dto.TeacherDto;
 import org.example.app.dto.UserDto;
 import org.example.app.entities.BookedLesson;
 import org.example.app.entities.FreeTime;
+import org.example.app.entities.Teacher;
 import org.example.app.entities.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.hateoas.client.LinkDiscoverer;
 import org.springframework.hateoas.client.LinkDiscoverers;
 import org.springframework.hateoas.mediatype.collectionjson.CollectionJsonLinkDiscoverer;
@@ -30,8 +33,8 @@ public class AppConfig {
     private String user;
     @Value("${spring.mail.password}")
     private String password;
-    @Value("${ENDPOINT_URL}")
-    private String endpointUrl;
+    //    @Value("${ENDPOINT_URL}")
+    private String endpointUrl = "https://announcementapp.s3.eu-central-1.amazonaws.com/";
 
 
     @Bean
@@ -60,28 +63,40 @@ public class AppConfig {
 
     }
 
+//    GenericApplicationContext context = new GenericApplicationContext();
+//    public void discovers() {
+//        List<LinkDiscoverer> plugins = new ArrayList<>();
+//        plugins.add(new CollectionJsonLinkDiscoverer());
+//        context.registerBean(LinkDiscoverers.class,SimplePluginRegistry.create(plugins));
+//    }
+
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
-        modelMapper.typeMap(User.class, UserDto.class).setPostConverter(context ->
+        modelMapper.typeMap(Teacher.class, TeacherDto.class).setPostConverter(context ->
         {
-            UserDto userDto = context.getDestination();
+//            System.out.println(userDto);
+            TeacherDto userDto = context.getDestination();
+            System.out.println(context.getSource());
+            System.out.println(context.getSource().getImageUrl());
+            System.out.println(userDto);
+            System.out.println(context);
             userDto.setImage(endpointUrl + context.getSource().getImageUrl());
             return userDto;
         });
         modelMapper.typeMap(FreeTime.class, AvailableTeachersHoursDto.class).setPreConverter(context ->
         {
             AvailableTeachersHoursDto dto = context.getDestination();
-            dto.setStartDate(context.getSource().getDate()+"T"+context.getSource().getTimeFrom());
-            dto.setEndDate(context.getSource().getDate()+"T"+context.getSource().getTimeTo());
+            dto.setStartDate(context.getSource().getDate() + "T" + context.getSource().getTimeFrom());
+            dto.setEndDate(context.getSource().getDate() + "T" + context.getSource().getTimeTo());
             return dto;
         });
         modelMapper.typeMap(BookedLesson.class, BookedLessonsViewDto.class).setPreConverter(context ->
         {
             BookedLessonsViewDto dto = context.getDestination();
-            dto.setStartDate(context.getSource().getDate()+"T"+context.getSource().getTimeFrom());
-            dto.setEndDate(context.getSource().getDate()+"T"+context.getSource().getTimeTo());
-            dto.setTitle("Lessons with "+context.getSource().getStudent().getFirstName()+" "+context.getSource().getStudent().getLastName());
+            dto.setStartDate(context.getSource().getDate() + "T" + context.getSource().getTimeFrom());
+            dto.setEndDate(context.getSource().getDate() + "T" + context.getSource().getTimeTo());
+            dto.setTitle("Lessons with " + context.getSource().getStudent().getFirstName() + " " + context.getSource().getStudent().getLastName());
             return dto;
         });
         return modelMapper;

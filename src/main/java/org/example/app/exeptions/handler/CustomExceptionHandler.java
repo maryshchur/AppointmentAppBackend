@@ -19,14 +19,14 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Object> handleRuntimeException
-            (RuntimeException exception) {
+           (RuntimeException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(generateErrorMessage(exception));
     }
 
     /**
      * Method which handles {@link MethodArgumentNotValidException} exception.
      *
-     * @param exception  {@link MethodArgumentNotValidException}
+     * @param exception {@link MethodArgumentNotValidException}
      * @return ResponseEntity which contains error message
      */
     @Override
@@ -37,13 +37,13 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
             WebRequest request) {
         List<ValidationExceptionDto> collect =
                 exception.getBindingResult().getFieldErrors()
-        .stream()
+                        .stream()
                         .map(ValidationExceptionDto::new)
                         .collect(Collectors.toList());
         collect.addAll(exception.getBindingResult().getGlobalErrors()
-                        .stream()
-                        .map(ValidationExceptionDto::new)
-                        .collect(Collectors.toList()));
+                .stream()
+                .map(ValidationExceptionDto::new)
+                .collect(Collectors.toList()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(collect);
     }
 

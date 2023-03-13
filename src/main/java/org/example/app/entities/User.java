@@ -26,7 +26,7 @@ public class User implements Serializable {
     @Column(nullable = false, length = 50)
     private String lastName;
 
-    private String imageUrl;
+    public String imageUrl;
 
     @Column(unique = true, length = 50,nullable = false)
     private String email;
@@ -39,7 +39,7 @@ public class User implements Serializable {
 
    // @Column(nullable = false)
    //@Column(columnDefinition = "boolean default false")
-    private boolean enabled;
+   private boolean enabled;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")

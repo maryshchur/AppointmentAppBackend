@@ -29,8 +29,10 @@ public class EmailSender {
             helper.setTo(recipient);
             helper.setSubject(subject);
             helper.setText("<html><body><h3>" + text +"</h3> </body></html>", true);
+            System.out.println(mailMessage);
             mailSender.send(mailMessage);
         } catch (MessagingException | MailException e) {
+            System.out.println(e.toString());
             //do smth, console log for example
         }
     }

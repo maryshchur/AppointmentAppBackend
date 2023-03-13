@@ -18,6 +18,7 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @Validated
@@ -55,6 +56,14 @@ public class StudentController {
     public ResponseEntity<List<BookedLessonsViewDto>> getBookedLessons(
             @ApiIgnore @AuthenticationPrincipal UserPrincipal principal) {
         return ResponseEntity.status(HttpStatus.OK).body(bookedLessonsService.getByStudentId(principal.getUser().getId()));
+    }
+
+    @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
+    @GetMapping("/student/subscription")
+    public ResponseEntity<Set<TeacherDto>> getSubscriptionsForCurrentStudent(@AuthenticationPrincipal @ApiIgnore UserPrincipal principal
+    ) throws Throwable {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.getSubscriptions(principal.getUser().getId()));
+
     }
 
     @ApiOperation(value = "", authorizations = {@Authorization(value = "JWT")})
