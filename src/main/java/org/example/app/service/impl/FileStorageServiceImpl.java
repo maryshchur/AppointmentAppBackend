@@ -23,12 +23,12 @@ import java.util.UUID;
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
     private AmazonS3 s3client;
-//    @Value("${BUCKET_NAME}")
-    private String bucketName="announcementapp";
-    //@Value("${ACCESS_KEY}")
-    private String accessKey = "AKIAJ4GGZQ4SA2DBYUAA";
-    // @Value("${SECRET_ACCESS_KEY}")
-    private String secretAccessKey = "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";
+    @Value("${BUCKET_NAME}")
+    private String bucketName;
+    @Value("${ACCESS_KEY}")
+    private String accessKey ;
+     @Value("${SECRET_ACCESS_KEY}")
+    private String secretAccessKey ;
 
 
     @PostConstruct
